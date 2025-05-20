@@ -1,10 +1,7 @@
 package com.example.demo.Repository;
 
 
-import com.example.demo.Entity.BiletEntity;
-import com.example.demo.Entity.KoltukEntity;
-import com.example.demo.Entity.SeansEntity;
-import com.example.demo.Entity.SeansKoltukBiletEntity;
+import com.example.demo.Entity.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -46,4 +43,6 @@ public interface SeansKoltukBiletRepository extends JpaRepository<SeansKoltukBil
 
     SeansKoltukBiletEntity findSeansKoltukBiletEntityBySeansAndKoltuk(SeansEntity seans, KoltukEntity koltuk);
     SeansKoltukBiletEntity findSeansKoltukBiletEntityByBilet(BiletEntity bilet);
+
+    void deleteAllBySeans(SeansEntity seans);
 }

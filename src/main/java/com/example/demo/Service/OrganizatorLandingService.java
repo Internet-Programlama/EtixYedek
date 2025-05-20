@@ -8,7 +8,7 @@ import com.example.demo.Dto.Response.*;
 import com.example.demo.Entity.*;
 import com.example.demo.Repository.*;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class OrganizatorLandingService {
@@ -109,6 +111,7 @@ public class OrganizatorLandingService {
         return etkinlik;
     }
 
+    @Transactional
     public EtkinlikGuncelleDto getEtkinlikGuncelleDto(Long orgId,Long eventId){
 
         OrganizatorEntity organizator = organizatorRepository.findByOrganizatorID(orgId);
@@ -119,17 +122,22 @@ public class OrganizatorLandingService {
 
         while (!etkinlikSalonSeansEntity.isEmpty())
         {
-            seansDuzenleDtoList.add(new SeansDuzenleDto(etkinlikSalonSeansEntity.getLast().getSeans().getSeansID(),etkinlikSalonSeansEntity.getLast().getSeans().getTarih()));
+            seansDuzenleDtoList.add(new SeansDuzenleDto(etkinlikSalonSeansEntity.getLast().getSeans().getSeansID(),
+                    etkinlikSalonSeansEntity.getLast().getSeans().getTarih()));
             etkinlikSalonSeansEntity.removeLast();
         }
 
         if (organizator!=null){
-            return new EtkinlikGuncelleDto(etkinlik.getEtkinlikID(),salon,seansDuzenleDtoList,etkinlik.getEtkinlikTur(),etkinlik.getSehir(), etkinlik.getEtkinlikAdi(), etkinlik.getKapakFotografi(), etkinlik.getEtkinlikAciklamasi(), etkinlik.getYasSiniri(),etkinlik.getEtkinlikSuresi(),etkinlik.getBiletFiyati());
+            return new EtkinlikGuncelleDto(etkinlik.getEtkinlikID(),salon,seansDuzenleDtoList,
+                    etkinlik.getEtkinlikTur(),etkinlik.getSehir(), etkinlik.getEtkinlikAdi(),
+                    etkinlik.getKapakFotografi(), etkinlik.getEtkinlikAciklamasi(),
+                    etkinlik.getYasSiniri(),etkinlik.getEtkinlikSuresi(),etkinlik.getBiletFiyati());
         }else {
             throw new EntityNotFoundException("organizator bulunamadı");
         }
     }
 
+    @Transactional
     public EtkinlikEntity etkinlikGuncelle(Long orgId,EtkinlikGuncelleDto etkinlikGuncelleDto){
         OrganizatorEntity organizator=organizatorRepository.findByOrganizatorID(orgId);
         EtkinlikEntity etkinlik=etkinlikRepository.findByEtkinlikID(etkinlikGuncelleDto.getEtkinlikId());
@@ -141,15 +149,34 @@ public class OrganizatorLandingService {
         }
 
         List<EtkinlikSalonSeansEntity> etkinlikSalonSeansEntityList = etkinlikSalonSeansRepository.findEtkinlikSalonSeansEntitiesByEtkinlik(etkinlik);
+
         SalonEntity salon=etkinlikSalonSeansEntityList.getFirst().getSalon();
+        Set<Long> gelenIds = etkinlikGuncelleDto.getSeansDuzenleDtoList().stream()
+                .map(SeansDuzenleDto::getSeansId)
+                .collect(Collectors.toSet());
+
+        //  Silinecek seansları tespit et ve sil
+        for (EtkinlikSalonSeansEntity ess : etkinlikSalonSeansEntityList) {
+            Long seansID = ess.getSeans().getSeansID();
+            if (!gelenIds.contains(seansID)) {
+                // önce koltuk-bilet ilişkilerini sil
+                seansKoltukBiletRepository.deleteAllBySeans(ess.getSeans());
+                // seans-salon-etkinlik bağlarını sil
+                etkinlikSalonSeansRepository.deleteByEtkinlikAndSeans(etkinlik, ess.getSeans());
+                // seansı sil
+                seansRepository.delete(ess.getSeans());
+            }
+        }
 
         while (!etkinlikGuncelleDto.getSeansDuzenleDtoList().isEmpty())
         {
-            SeansEntity seans=seansRepository.findBySeansID(etkinlikGuncelleDto.getSeansDuzenleDtoList().getLast().getSeansId());
+            SeansEntity seans = seansRepository.findBySeansID(etkinlikGuncelleDto.getSeansDuzenleDtoList().getLast().getSeansId());
             seans.setTarih(etkinlikGuncelleDto.getSeansDuzenleDtoList().getLast().getTarih());
             seansRepository.save(seans);
             etkinlikGuncelleDto.getSeansDuzenleDtoList().removeLast();
         }
+
+
 
         List<SeansEntity> seansEntityList = new ArrayList<>();
 

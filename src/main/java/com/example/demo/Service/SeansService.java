@@ -28,11 +28,6 @@ public class SeansService {
         this.scheduler = scheduler;
     }
 
-    /**
-     * Bir seans için "bitiş zamanı"na göre tarihiGectiMi==true yapacak task schedule eder.
-     * @param seans seans entity
-     * @param etkinlikSuresi etkinliğin toplam süresi (dakika)
-     */
     public void scheduleSessionExpired(SeansEntity seans, int etkinlikSuresi) {
         Instant runAt = seans.getTarih().toInstant()
                 .plus(Duration.ofMinutes(etkinlikSuresi));

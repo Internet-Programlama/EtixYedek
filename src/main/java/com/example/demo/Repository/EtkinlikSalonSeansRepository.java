@@ -14,6 +14,8 @@ import java.util.List;
 @Repository
 public interface EtkinlikSalonSeansRepository extends JpaRepository<EtkinlikSalonSeansEntity, Long> {
 
+    void deleteAllBySeans(SeansEntity seans);
+
     @Query("""
     SELECT DISTINCT ess.salon FROM EtkinlikSalonSeansEntity ess
     WHERE ess.etkinlik.etkinlikID = :etkinlikId
@@ -36,4 +38,5 @@ public interface EtkinlikSalonSeansRepository extends JpaRepository<EtkinlikSalo
 """)
     List<Object[]> findSalonlarVeSeanslarByEtkinlik(@Param("etkinlikId") Long etkinlikId);
 
+    void deleteByEtkinlikAndSeans(EtkinlikEntity etkinlik, SeansEntity seans);
 }
