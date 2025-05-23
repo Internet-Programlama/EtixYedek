@@ -40,19 +40,14 @@ public class LandingController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Page<EtkinlikEntity>>  getEtkinlikler(
+    public Page<EtkinlikEntity>  getEtkinlikler(
             @RequestParam(required = false) String etkinlikTurAdi,
             @RequestParam(required = false) String sehirAdi,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         checkRole("ROLE_USER");
-        Page<EtkinlikEntity> etkinlikEntities = landingService.getEtkinlikler(etkinlikTurAdi, sehirAdi, page, size);
-        if (etkinlikEntities.getTotalElements() > 0) {
-            return ResponseEntity.ok(etkinlikEntities);
-        }else {
-            return ResponseEntity.notFound().build();
-        }
+        return landingService.getEtkinlikler(etkinlikTurAdi, sehirAdi, page, size);
     }
 
     @GetMapping("/{eventId}")
