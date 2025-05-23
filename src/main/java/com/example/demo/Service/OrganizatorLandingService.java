@@ -37,9 +37,10 @@ public class OrganizatorLandingService {
     private final KullaniciBiletRepository kullaniciBiletRepository;
     private final BiletRepository biletRepository;
     private final EtkinlikService etkinlikService;
+    private final SeansService seansService;
 
     @Autowired
-    public OrganizatorLandingService(BiletRepository biletRepository, KullaniciBiletRepository kullaniciBiletRepository, SeansKoltukBiletRepository seansKoltukBiletRepository,KoltukRepository koltukRepository,OrganizatorRepository organizatorRepository, EtkinlikRepository etkinlikRepository, SeansRepository seansRepository, SalonRepository salonRepository, EtkinlikSalonSeansRepository etkinlikSalonSeansRepository, SehirRepository sehirRepository, SinemaRepository sinemaRepository, EtkinlikService etkinlikService) {
+    public OrganizatorLandingService(BiletRepository biletRepository, KullaniciBiletRepository kullaniciBiletRepository, SeansKoltukBiletRepository seansKoltukBiletRepository, KoltukRepository koltukRepository, OrganizatorRepository organizatorRepository, EtkinlikRepository etkinlikRepository, SeansRepository seansRepository, SalonRepository salonRepository, EtkinlikSalonSeansRepository etkinlikSalonSeansRepository, SehirRepository sehirRepository, SinemaRepository sinemaRepository, EtkinlikService etkinlikService, SeansService seansService) {
         this.kullaniciBiletRepository=kullaniciBiletRepository;
         this.biletRepository=biletRepository;
         this.seansKoltukBiletRepository=seansKoltukBiletRepository;
@@ -52,6 +53,7 @@ public class OrganizatorLandingService {
         this.sehirRepository = sehirRepository;
         this.sinemaRepository = sinemaRepository;
         this.etkinlikService = etkinlikService;
+        this.seansService = seansService;
     }
 
 
@@ -101,6 +103,7 @@ public class OrganizatorLandingService {
 
         for (SeansEntity s:seansEntityList)
         {
+            seansService.scheduleSessionExpired(s, etkinlik.getEtkinlikSuresi());
             for (KoltukEntity k:koltukEntityList)
             {
                 seansKoltukBiletRepository.save(new SeansKoltukBiletEntity(s,k,false));
@@ -193,6 +196,7 @@ public class OrganizatorLandingService {
 
         for(SeansEntity s : seansEntityList)
         {
+            seansService.scheduleSessionExpired(s, etkinlik.getEtkinlikSuresi());
             for (KoltukEntity k: koltukEntityList)
             {
                 seansKoltukBiletRepository.save(new SeansKoltukBiletEntity(s,k,false));

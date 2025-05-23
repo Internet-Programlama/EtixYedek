@@ -79,7 +79,7 @@ public class LandingService {
         if (etkinlikOptional.isPresent()) {
             EtkinlikEntity etkinlik = etkinlikOptional.get();
             List<EtkinlikSalonSeansEntity> etkinlikSalonSeansEntities = etkinlikSalonSeansRepository.findEtkinlikSalonSeansEntitiesByEtkinlik(etkinlik);
-
+            etkinlikSalonSeansEntities.removeIf(etkinlikSalonSeansEntity -> etkinlikSalonSeansEntity.getSeans().isTarihiGectiMi());
             return new EtkinlikDetayDto(
                     etkinlik.getEtkinlikID(),
                     etkinlik.getEtkinlikAdi(),

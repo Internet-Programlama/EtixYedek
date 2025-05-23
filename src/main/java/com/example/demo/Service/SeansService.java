@@ -28,6 +28,7 @@ public class SeansService {
         this.scheduler = scheduler;
     }
 
+    @Transactional
     public void scheduleSessionExpired(SeansEntity seans, int etkinlikSuresi) {
         Instant runAt = seans.getTarih().toInstant()
                 .plus(Duration.ofMinutes(etkinlikSuresi));
