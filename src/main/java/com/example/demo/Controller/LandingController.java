@@ -49,7 +49,6 @@ public class LandingController {
             @RequestParam(defaultValue = "10") int size
     ) {
         checkRole("ROLE_USER");
-        System.out.println(sehirAdi+" "+etkinlikTurAdi);
         return landingService.getEtkinlikler(etkinlikTurAdi, sehirAdi, page, size);
     }
 
