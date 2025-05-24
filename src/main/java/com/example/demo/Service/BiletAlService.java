@@ -12,6 +12,7 @@ import java.util.Optional;
 @Service
 public class BiletAlService {
 
+    private final MailService mailService;
     BiletRepository biletRepository;
     KullaniciRepository kullaniciRepository;
     KullaniciBiletRepository kullaniciBiletRepository;
@@ -21,7 +22,7 @@ public class BiletAlService {
     SatinAlService satinAlService;
 
     @Autowired
-    public BiletAlService(SatinAlService satinAlService,KoltukRepository koltukRepository,SeansRepository seansRepository,BiletRepository biletRepository, KullaniciRepository kullaniciRepository, KullaniciBiletRepository kullaniciBiletRepository, SeansKoltukBiletRepository seansKoltukBiletRepository) {
+    public BiletAlService(SatinAlService satinAlService, KoltukRepository koltukRepository, SeansRepository seansRepository, BiletRepository biletRepository, KullaniciRepository kullaniciRepository, KullaniciBiletRepository kullaniciBiletRepository, SeansKoltukBiletRepository seansKoltukBiletRepository, MailService mailService) {
         this.satinAlService=satinAlService;
         this.biletRepository = biletRepository;
         this.kullaniciRepository = kullaniciRepository;
@@ -29,11 +30,17 @@ public class BiletAlService {
         this.seansKoltukBiletRepository = seansKoltukBiletRepository;
         this.seansRepository = seansRepository;
         this.koltukRepository = koltukRepository;
+        this.mailService = mailService;
     }
     @Transactional
     public boolean biletAl(BiletAlDto biletAlDto, Long kullaniciId) {
 
         //satın alınmış biletin tekrar satın alınmaması için bir kontrol daha ekle
+        SeansKoltukBiletEntity seansKoltukBiletEntity=seansKoltukBiletRepository.findSeansKoltukBiletEntityBySeansAndKoltuk(seansRepository.findBySeansID(biletAlDto.getSeansId()),koltukRepository.findByKoltukID(biletAlDto.getKoltukId()));
+        if (seansKoltukBiletEntity.getKoltukdurumu())
+        {
+            return false;
+        }
 
         BiletEntity bilet = biletRepository.save(
                 new BiletEntity(biletAlDto.isOdendiMi(), biletAlDto.getOdenenMiktar())
@@ -56,6 +63,7 @@ public class BiletAlService {
 
         satinAlService.satinAl();
 
+        mailService.biletAlSendMail(kullanici.getEmail(),bilet.getBiletID());
         return true;
     }
 

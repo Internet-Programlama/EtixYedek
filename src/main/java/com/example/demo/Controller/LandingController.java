@@ -4,6 +4,8 @@ import com.example.demo.Dto.KullaniciProfiliDto;
 import com.example.demo.Dto.Response.*;
 import com.example.demo.Entity.EtkinlikEntity;
 import com.example.demo.Service.LandingService;
+import jakarta.validation.constraints.Null;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,6 +49,7 @@ public class LandingController {
             @RequestParam(defaultValue = "10") int size
     ) {
         checkRole("ROLE_USER");
+        System.out.println(sehirAdi+" "+etkinlikTurAdi);
         return landingService.getEtkinlikler(etkinlikTurAdi, sehirAdi, page, size);
     }
 

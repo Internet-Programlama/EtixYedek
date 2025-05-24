@@ -38,9 +38,10 @@ public class OrganizatorLandingService {
     private final BiletRepository biletRepository;
     private final EtkinlikService etkinlikService;
     private final SeansService seansService;
+    private final MailService mailService;
 
     @Autowired
-    public OrganizatorLandingService(BiletRepository biletRepository, KullaniciBiletRepository kullaniciBiletRepository, SeansKoltukBiletRepository seansKoltukBiletRepository, KoltukRepository koltukRepository, OrganizatorRepository organizatorRepository, EtkinlikRepository etkinlikRepository, SeansRepository seansRepository, SalonRepository salonRepository, EtkinlikSalonSeansRepository etkinlikSalonSeansRepository, SehirRepository sehirRepository, SinemaRepository sinemaRepository, EtkinlikService etkinlikService, SeansService seansService) {
+    public OrganizatorLandingService(BiletRepository biletRepository, KullaniciBiletRepository kullaniciBiletRepository, SeansKoltukBiletRepository seansKoltukBiletRepository, KoltukRepository koltukRepository, OrganizatorRepository organizatorRepository, EtkinlikRepository etkinlikRepository, SeansRepository seansRepository, SalonRepository salonRepository, EtkinlikSalonSeansRepository etkinlikSalonSeansRepository, SehirRepository sehirRepository, SinemaRepository sinemaRepository, EtkinlikService etkinlikService, SeansService seansService, MailService mailService) {
         this.kullaniciBiletRepository=kullaniciBiletRepository;
         this.biletRepository=biletRepository;
         this.seansKoltukBiletRepository=seansKoltukBiletRepository;
@@ -54,6 +55,7 @@ public class OrganizatorLandingService {
         this.sinemaRepository = sinemaRepository;
         this.etkinlikService = etkinlikService;
         this.seansService = seansService;
+        this.mailService = mailService;
     }
 
 
@@ -223,7 +225,8 @@ public class OrganizatorLandingService {
         List<EtkinlikSalonSeansEntity> etkinlikSalonSeansEntityList = etkinlikSalonSeansRepository.findEtkinlikSalonSeansEntitiesByEtkinlik(etkinlik);
 
         List<SeansEntity> seansEntityList=new ArrayList<>();
-
+        String email;
+        Long biletID;
 
         for (EtkinlikSalonSeansEntity etkinlikSalonSeansEntity: etkinlikSalonSeansEntityList)
         {
@@ -238,6 +241,9 @@ public class OrganizatorLandingService {
             for (SeansKoltukBiletEntity seansKoltukBiletEntity: seansKoltukBiletEntityList)
             {
                 if (seansKoltukBiletEntity.getBilet()!=null) {
+                    email = kullaniciBiletRepository.findByBilet(seansKoltukBiletEntity.getBilet()).getKullanici().getEmail();
+                    biletID = seansKoltukBiletEntity.getBilet().getBiletID();
+                    mailService.etkinlikSilSendMail(email,biletID);
                     KullaniciBiletEntity kullaniciBiletEntity = kullaniciBiletRepository.findByBilet(seansKoltukBiletEntity.getBilet());
                     kullaniciBiletRepository.delete(kullaniciBiletEntity);
                     biletRepository.delete(seansKoltukBiletEntity.getBilet());

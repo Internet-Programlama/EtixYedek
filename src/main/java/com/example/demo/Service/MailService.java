@@ -41,4 +41,17 @@ public class MailService {
         simpleMailMessage.setText(biletID + " id sine sahip biletiniz etkinlik iptal edildiği için iptal edilmiştir. İyi günler dileriz.");
         javaMailSender.send(simpleMailMessage);
     }
+
+    @Async
+    public void biletAlSendMail(String aliciEposta, Long biletId)
+    {
+        SimpleMailMessage simpleMailMessage=new SimpleMailMessage();
+
+        String biletID = String.valueOf(biletId);
+
+        simpleMailMessage.setSubject("Etix bilet satın alımı");
+        simpleMailMessage.setTo(aliciEposta);
+        simpleMailMessage.setText(biletID + " id li biletinizin satın alımı başarıyla tamamlanmıştır. İyi günler dileriz.");
+        javaMailSender.send(simpleMailMessage);
+    }
 }
